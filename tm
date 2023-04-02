@@ -8,7 +8,7 @@ presets=${TM_LAYOUTS_DIR:-"${XDG_DATA_HOME:-$HOME/.local/share}/tmux-companion"}
 
 die() { printf '%s: %s.\n' "$0" "$1" >&2; exit 1; }
 # Searches for all non hidden directories
-get_dirs() { find $dirs -mindepth 1 -maxdepth 1 -type d | sed "/\.[^\.]*/d"; }
+get_dirs() { find $dirs -mindepth 1 -maxdepth 1 -type d; }
 run_preset() { "$TM_PRESENTS" && [ -r "$2" ] && tmux send-keys -t "$1" ". $2" Enter; }
 
 main() {
