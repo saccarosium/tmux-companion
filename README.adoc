@@ -26,8 +26,8 @@ chmod +x ~/.local/bin/tm-preset
 
 NOTE: For more info run `tm --help` or `tm-preset --help`
 
-link::etc/demo.mov[options=autoplay]
-link::etc/demo2.mov[options=autoplay]
+video::https://user-images.githubusercontent.com/96259932/229377399-0cd5808c-9db0-4b6c-97d8-8002528989c3.mov[options=autoplay]
+video::https://user-images.githubusercontent.com/96259932/229377389-7564cf20-41e4-4bde-87ad-a70e7cc49ae5.mov[options=autoplay]
 
 == Acknowledgment
 
