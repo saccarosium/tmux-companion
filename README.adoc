@@ -1,0 +1,34 @@
+= Tmux Companion
+
+Your POSIX companion for tmux session and layout managment.
+
+== Dependencies
+
+* tmux (_duh!_)
+* POSIX compliant shell
+* POSIX utils
+* fzf or your favorite picker (e.g. fzy, rofi, dmenu, etc)
+
+== Installation
+
+IMPORTANT: Make sure that `~/.local/bin` is in your `PATH`.
+
+[,bash]
+----
+mkdir -p ~/.local/bin
+curl https://raw.githubusercontent.com/saccarosium/tmux-companion/main/tm -o ~/.local/bin/tm
+curl https://raw.githubusercontent.com/saccarosium/tmux-companion/main/tm-preset -o ~/.local/bin/tm-preset
+chmod +x ~/.local/bin/tm
+chmod +x ~/.local/bin/tm-preset
+----
+
+== Usage
+
+NOTE: For more info run `tm --help` or `tm-preset --help`
+
+**video**
+**vider**
+
+== Acknowledgment
+
+This script was inspired originally inspired by ThePrimeagen's https://github.com/ThePrimeagen/.dotfiles/blob/master/bin/.local/scripts/tmux-sessionizer[tmux-sessionizer], but since the shell scripting foo of ThePrimeagen is very lacking, and the man continue to push a broken script, I've decided to publish my improved version, first conceptualized in this https://github.com/ThePrimeagen/.dotfiles/pull/16[PR] (was my first PR on Github didn't know how to use git).
