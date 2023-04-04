@@ -16,8 +16,8 @@ IMPORTANT: Make sure that `~/.local/bin` is in your `PATH`.
 [,bash]
 ----
 mkdir -p ~/.local/bin
-curl https://raw.githubusercontent.com/saccarosium/tmux-companion/main/tm -o ~/.local/bin/tm
-curl https://raw.githubusercontent.com/saccarosium/tmux-companion/main/tm-preset -o ~/.local/bin/tm-preset
+curl https://raw.githubusercontent.com/saccarosium/tmux-companion/main/bin/tm -o ~/.local/bin/tm
+curl https://raw.githubusercontent.com/saccarosium/tmux-companion/main/bin/tm-preset -o ~/.local/bin/tm-preset
 chmod +x ~/.local/bin/tm
 chmod +x ~/.local/bin/tm-preset
 ----
