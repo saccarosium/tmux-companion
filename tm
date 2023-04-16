@@ -12,7 +12,7 @@ die() {
 }
 # Searches for all non hidden directories
 get_dirs() { find $dirs -mindepth 1 -maxdepth 1 -type d; }
-run_preset() { "$TM_PRESENTS" && [ -r "$2" ] && tmux send-keys -t "$1" ". $2" Enter; }
+run_template() { "$TM_TEMPLATES" && [ -r "$2" ] && tmux send-keys -t "$1" ". $2" Enter; }
 
 help() {
     less <<EOF
@@ -121,7 +121,7 @@ main() {
             || tmux new-session -s "$selected_name" -c "$selected"
         tmux attach -t "$selected_name"
     fi
-    run_preset "$selected_base" "$presets/$selected.preset"
+    run_template "$selected_base" "$presets/$selected.preset"
 }
 
 main "$@"
