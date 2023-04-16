@@ -5,7 +5,7 @@ DIR := $(HOME)/.local/bin
 
 install:
 	$(MKDIR) $(DIR)
-	$(LN) $(PWD)/bin/tm $(DIR)/tm
+	$(LN) $(PWD)/tm $(DIR)/tm
 	$(CHMOD) $(DIR)/tm
 
 update:
