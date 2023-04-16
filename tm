@@ -2,7 +2,7 @@
 
 picker=${TM_PICKER:-"fzf"}
 dirs=${TM_SRCS}
-presets=${TM_TEMPLATES_DIR:-"${XDG_DATA_HOME:-$HOME/.local/share}/tmux-companion"}
+presets=${TM_TEMPLATES_DIR:-"${XDG_DATA_HOME:-$HOME/.config}/tmux-companion"}
 
 : "${TM_TEMPLATES:=true}"
 
@@ -42,7 +42,7 @@ ENVIROMENT
 
     TM_TEMPLATES: disable templates capabilities
 
-    TM_TEMPLATES_DIR: where tm searches for directory templates (default:"\$XDG_DATA_HOME/tmux-companion/")
+    TM_TEMPLATES_DIR: where tm searches for directory templates (default:"\$XDG_CONFIG_HOME/tmux-companion/")
 EOF
 }
 
