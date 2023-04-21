@@ -1,18 +1,16 @@
 #!/bin/sh
 
 picker=${TM_PICKER:-"fzf"}
-dirs=${TM_SRCS}
-presets=${TM_TEMPLATES_DIR:-"${XDG_DATA_HOME:-$HOME/.config}/tmux-companion"}
+tmpl_dir=${TM_TEMPLATES_DIR:-"${XDG_CONFIG_HOME:-$HOME/.config}/tmux-companion"}
 
 : "${TM_TEMPLATES:=true}"
 
-die() {
-    printf '%s: %s.\n' "$0" "$1" >&2
-    exit 1
-}
+die() { printf '%s: %s.\n' "$0" "$1" exit 1 >&2; }
 # Searches for all non hidden directories
-get_dirs() { find $dirs -mindepth 1 -maxdepth 1 -type d; }
-run_template() { "$TM_TEMPLATES" && [ -r "$2" ] && tmux send-keys -t "$1" ". $2" Enter; }
+scrs() {
+    tmux list-sessions 2>/dev/null
+    [ -n "$TM_SRCS" ] && find $TM_SRCS -maxdepth 1 -type d
+}
 
 help() {
     less <<EOF
@@ -46,8 +44,11 @@ ENVIROMENT
 EOF
 }
 
-gen_template() {
-    cat <<EOF >"$target"
+tmpl_get() { printf "%s/%s.template\n" "$tmpl_dir" "$1"; }
+
+tmpl_gen() {
+    basename=$(basename "$1" | tr '[:lower:]' '[:upper:]' | tr '-' '_' | cut -d'.' -f1)
+    cat <<EOF >"$1"
 #!/bin/sh
 # Welcome to the default preset for tmux-companion. As you can see this is a
 # POSIX shellscript but you can use whatever POSIX compatible shell language
@@ -60,6 +61,8 @@ gen_template() {
 # This is here to prevent re-executon when switching between sessions
 if [ -z "\$TM_LOCK_$basename" ] && [ -n "\$TMUX" ]; then
     export TM_LOCK_$basename=1
+elif [ -n "\$TM_LOCK_$basename ]; then
+    return
 fi
 
 # You can run whatever tmux command you want:
@@ -69,59 +72,64 @@ fi
 EOF
 }
 
-edit_template() {
-    target="$presets/${1:-${PWD##*/}}.presets"
-    basename=$(basename "$target" | tr '[:lower:]' '[:upper:]' | tr '-' '_' | cut -d'.' -f1)
-    if [ -d "$presets" ]; then
+tmpl_run() {
+    target=$(tmpl_get "$2")
+    "$TM_TEMPLATES" && [ -r "$target" ] && tmux send-keys -t "$1" ". $target" Enter
+}
+
+tmpl_edit() {
+    target=$(tmpl_get "${1:-$(basename "$PWD")}")
+    if [ -d "$tmpl_dir" ]; then
         ! [ -f "$target" ] \
-            && gen_template
+            && tmpl_gen "$target"
         ${EDITOR:-vi} "$target"
     else
-        die "$presets directory doesn't exitst"
+        die "$tmpl_dir directory doesn't exitst"
     fi
 }
+
+sess_nm_fmt() { basename "$1" | sed "s/\./_/g; s/\ /-/g" | head -c8; }
 
 main() {
     case "$1" in
         "")
-            [ -z "$dirs" ] && die "You need to set the TMS_SRCS env variable"
-            selected=$(get_dirs | "$picker")
+            sel=$(scrs | "$picker")
             ;;
         -h | --help)
             help
             exit 0
             ;;
         -t | --template)
-            edit_template "$2"
+            tmpl_edit "$2"
             ;;
         .)
-            selected="$PWD"
+            sel="$PWD"
             ;;
         *)
-            selected="$1"
+            sel="$*"
             ;;
     esac
 
-    [ -z "$selected" ] && exit 0
+    [ -z "$sel" ] && exit 0
 
-    selected_base=$(basename "$selected")
+    sess_nm_bs=$(basename "$sel")
     # Getting first 8 caracters of name for preventing tmux to truncate the
     # name label box.
     # If you have the directory name "tmux-companion" tmux will truncate at the
     # 9th line like so: '[tmux-comp'. If instead we take the first 8 characters
     # will become something like this: '[tmux-com]'
-    selected_name=$(basename "$selected" | tr . _ | head -c8)
+    sess_nm=$(sess_nm_fmt "$sel")
 
     if [ -n "$TMUX" ]; then # If in tmux
-        tmux has-session -t "$selected_name" 2>/dev/null \
-            || tmux new-session -ds "$selected_name" -c "$selected"
-        tmux switch-client -t "$selected_name"
+        tmux has-session -t "$sess_nm" 2>/dev/null \
+            || tmux new-session -ds "$sess_nm" -c "$sel"
+        tmux switch-client -t "$sess_nm"
     elif [ -z "$TMUX" ]; then # If outside of tmux
-        tmux has-session -t "$selected_name" 2>/dev/null \
-            || tmux new-session -s "$selected_name" -c "$selected"
-        tmux attach -t "$selected_name"
+        tmux has-session -t "$sess_nm" 2>/dev/null \
+            || tmux new-session -s "$sess_nm" -c "$sel"
+        tmux attach -t "$sess_nm"
     fi
-    run_template "$selected_base" "$presets/$selected.preset"
+    tmpl_run "$sess_nm_bs" "$sel"
 }
 
 main "$@"
