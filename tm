@@ -80,8 +80,8 @@ tmpl_run() {
 tmpl_edit() {
     target=$(tmpl_get "${1:-$(basename "$PWD")}")
     if [ -d "$tmpl_dir" ]; then
-        ! [ -f "$target" ] \
-            && tmpl_gen "$target"
+        ! [ -f "$target" ] &&
+            tmpl_gen "$target"
         ${EDITOR:-vi} "$target"
     else
         die "$tmpl_dir directory doesn't exitst"
@@ -92,22 +92,22 @@ sess_nm_fmt() { basename "$1" | sed "s/\./_/g; s/\ /-/g" | head -c8; }
 
 main() {
     case "$1" in
-        "")
-            sel=$(scrs | "$picker")
-            ;;
-        -h | --help)
-            help
-            exit 0
-            ;;
-        -t | --template)
-            tmpl_edit "$2"
-            ;;
-        .)
-            sel="$PWD"
-            ;;
-        *)
-            sel="$*"
-            ;;
+    "")
+        sel=$(scrs | "$picker")
+        ;;
+    -h | --help)
+        help
+        exit 0
+        ;;
+    -t | --template)
+        tmpl_edit "$2"
+        ;;
+    .)
+        sel="$PWD"
+        ;;
+    *)
+        sel="$*"
+        ;;
     esac
 
     [ -z "$sel" ] && exit 0
@@ -121,12 +121,12 @@ main() {
     sess_nm=$(sess_nm_fmt "$sel")
 
     if [ -n "$TMUX" ]; then # If in tmux
-        tmux has-session -t "$sess_nm" 2>/dev/null \
-            || tmux new-session -ds "$sess_nm" -c "$sel"
+        tmux has-session -t "$sess_nm" 2>/dev/null ||
+            tmux new-session -ds "$sess_nm" -c "$sel"
         tmux switch-client -t "$sess_nm"
     elif [ -z "$TMUX" ]; then # If outside of tmux
-        tmux has-session -t "$sess_nm" 2>/dev/null \
-            || tmux new-session -s "$sess_nm" -c "$sel"
+        tmux has-session -t "$sess_nm" 2>/dev/null ||
+            tmux new-session -s "$sess_nm" -c "$sel"
         tmux attach -t "$sess_nm"
     fi
     tmpl_run "$sess_nm_bs" "$sel"
