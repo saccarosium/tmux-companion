@@ -1,7 +1,7 @@
 #!/bin/sh
 
 picker=${TM_PICKER:-"fzf"}
-tmpl_dir=${TM_TEMPLATES_DIR:-"${XDG_CONFIG_HOME:-$HOME/.config}/tmux-companion"}
+template_dir=${TM_TEMPLATES_DIR:-"${XDG_CONFIG_HOME:-$HOME/.config}/tmux-companion"}
 
 : "${TM_TEMPLATES:=true}"
 
@@ -44,9 +44,9 @@ ENVIROMENT
 EOF
 }
 
-tmpl_get() { printf "%s/%s.template\n" "$tmpl_dir" "$1"; }
+template_get() { printf "%s/%s.template\n" "$template_dir" "$1"; }
 
-tmpl_gen() {
+template_gen() {
     basename=$(basename "$1" | tr '[:lower:]' '[:upper:]' | tr '-' '_' | cut -d'.' -f1)
     cat <<EOF >"$1"
 #!/bin/sh
@@ -72,23 +72,28 @@ fi
 EOF
 }
 
-tmpl_run() {
-    target=$(tmpl_get "$2")
+template_run() {
+    target=$(template_get "$2")
     "$TM_TEMPLATES" && [ -r "$target" ] && tmux send-keys -t "$1" ". $target" Enter
 }
 
-tmpl_edit() {
-    target=$(tmpl_get "${1:-$(basename "$PWD")}")
-    if [ -d "$tmpl_dir" ]; then
+template_edit() {
+    target=$(template_get "${1:-$(basename "$PWD")}")
+    if [ -d "$template_dir" ]; then
         ! [ -f "$target" ] &&
-            tmpl_gen "$target"
+            template_gen "$target"
         ${EDITOR:-vi} "$target"
     else
-        die "$tmpl_dir directory doesn't exitst"
+        die "$template_dir directory doesn't exitst"
     fi
 }
 
-sess_nm_fmt() { basename "$1" | sed "s/\./_/g; s/\ /-/g" | head -c8; }
+# Getting first 8 caracters of name for preventing tmux to truncate the
+# name label box.
+# If you have the directory name "tmux-companion" tmux will truncate at the
+# 9th line like so: '[tmux-comp'. If instead we take the first 8 characters
+# will become something like this: '[tmux-com]'
+session_name_fmt() { basename "$1" | sed "s/\./_/g; s/\ /-/g" | head -c8; }
 
 main() {
     case "$1" in
@@ -100,7 +105,7 @@ main() {
         exit 0
         ;;
     -t | --template)
-        tmpl_edit "$2"
+        template_edit "$2"
         ;;
     .)
         sel="$PWD"
@@ -112,24 +117,19 @@ main() {
 
     [ -z "$sel" ] && exit 0
 
-    sess_nm_bs=$(basename "$sel")
-    # Getting first 8 caracters of name for preventing tmux to truncate the
-    # name label box.
-    # If you have the directory name "tmux-companion" tmux will truncate at the
-    # 9th line like so: '[tmux-comp'. If instead we take the first 8 characters
-    # will become something like this: '[tmux-com]'
-    sess_nm=$(sess_nm_fmt "$sel")
+    session_name_bs=$(basename "$sel")
+    session_name=$(session_name_fmt "$sel")
 
     if [ -n "$TMUX" ]; then # If in tmux
-        tmux has-session -t "$sess_nm" 2>/dev/null ||
-            tmux new-session -ds "$sess_nm" -c "$sel"
-        tmux switch-client -t "$sess_nm"
+        tmux has-session -t "$session_name" 2>/dev/null ||
+            tmux new-session -ds "$session_name" -c "$sel"
+        tmux switch-client -t "$session_name"
     elif [ -z "$TMUX" ]; then # If outside of tmux
-        tmux has-session -t "$sess_nm" 2>/dev/null ||
-            tmux new-session -s "$sess_nm" -c "$sel"
-        tmux attach -t "$sess_nm"
+        tmux has-session -t "$session_name" 2>/dev/null ||
+            tmux new-session -s "$session_name" -c "$sel"
+        tmux attach -t "$session_name"
     fi
-    tmpl_run "$sess_nm_bs" "$sel"
+    template_run "$session_name_bs" "$sel"
 }
 
 main "$@"
